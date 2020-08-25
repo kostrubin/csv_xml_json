@@ -1,20 +1,31 @@
 import com.google.gson.*;
 import com.opencsv.CSVReader;
 import com.opencsv.bean.*;
+import org.w3c.dom.*;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.*;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
         String[] columnMapping = {"id", "firstName", "lastName", "country", "age"};
-        String fileName = "data.csv";
+        String csvFileName = "data.csv";
+        String xmlFileName = "data.xml";
 
-        List<Employee> list = parseCSV(columnMapping, fileName);
-        String json = listToJson(list);
-        writeString(json);
+        // task 1
+        List<Employee> csvList = parseCSV(columnMapping, csvFileName);
+        String jsonFromCsv = listToJson(csvList);
+        writeString(jsonFromCsv, "data.json");
+
+        // task 2
+        List<Employee> xmlList = parseXML(xmlFileName);
+        String jsonFromXml = listToJson(xmlList);
+        writeString(jsonFromXml, "data2.json");
     }
-    
+
     private static List<Employee> parseCSV(String[] columnMapping, String fileName) {
         try (CSVReader reader = new CSVReader(new FileReader(fileName))) {
 
@@ -42,12 +53,43 @@ public class Main {
         return gson.toJson(list);
     }
 
-    private static void writeString(String json) {
-        try (FileWriter file = new FileWriter("new_data.json")) {
+    private static void writeString(String json, String outputName) {
+        try (FileWriter file = new FileWriter(outputName)) {
             file.write(json);
             file.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static List<Employee> parseXML(String file) {
+        List<Employee> resultList = new ArrayList<>();
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = null;
+            builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(new File(file));
+            doc.getDocumentElement();
+            NodeList nodeList = doc.getDocumentElement().getChildNodes();
+
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Node node = nodeList.item(i);
+
+                if (Node.ELEMENT_NODE == node.getNodeType()) {
+                    Element element = (Element) node;
+                    resultList.add(new Employee(
+                        Long.parseLong(element.getElementsByTagName("id").item(0).getTextContent()),
+                        element.getElementsByTagName("firstName").item(0).getTextContent(),
+                        element.getElementsByTagName("lastName").item(0).getTextContent(),
+                        element.getElementsByTagName("country").item(0).getTextContent(),
+                        Integer.parseInt(element.getElementsByTagName("age").item(0).getTextContent())
+                    ));
+                }
+            }
+        } catch (ParserConfigurationException | SAXException | IOException e) {
+            e.printStackTrace();
+        }
+
+        return resultList;
     }
 }
