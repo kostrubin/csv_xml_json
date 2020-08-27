@@ -26,7 +26,7 @@ public class Main {
         writeString(jsonFromXml, "data2.json");
     }
 
-    private static List<Employee> parseCSV(String[] columnMapping, String fileName) {
+    public static List<Employee> parseCSV(String[] columnMapping, String fileName) {
         try (CSVReader reader = new CSVReader(new FileReader(fileName))) {
 
             ColumnPositionMappingStrategy<Employee> strategy = new ColumnPositionMappingStrategy<>();
@@ -46,14 +46,14 @@ public class Main {
         return null;
     }
 
-    private static String listToJson(List<Employee> list) {
+    public static String listToJson(List<Employee> list) {
         GsonBuilder builder = new GsonBuilder();
         Gson gson = builder.create();
 
         return gson.toJson(list);
     }
 
-    private static void writeString(String json, String outputName) {
+    public static void writeString(String json, String outputName) {
         try (FileWriter file = new FileWriter(outputName)) {
             file.write(json);
             file.flush();
@@ -62,7 +62,7 @@ public class Main {
         }
     }
 
-    private static List<Employee> parseXML(String file) {
+    public static List<Employee> parseXML(String file) {
         List<Employee> resultList = new ArrayList<>();
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
